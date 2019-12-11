@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -18,6 +18,7 @@ import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -27,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     flex: 1,
   },
-  formField: {
+  formFieldTopMargin: {
     marginTop: theme.spacing(2),
   },
 }));
@@ -38,51 +39,54 @@ const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={r
 export default function BookmarkDialog({
   open,
   creatingNew,
+  name,
+  onNameChange,
+  url,
+  onUrlChange,
+  category,
+  onCategoryChange,
   bookmarkCategories,
-  bookmarkData,
   onClose,
-  onDataSave,
+  onSave,
 }) {
   const classes = useStyles();
   const fullScreen = useMediaQuery(useTheme().breakpoints.down('xs'));
 
-  const [name, setName] = useState(bookmarkData.name);
-  const handleNameChange = (event) => {
-    setName(event.target.value);
-  };
-
-  const [url, setUrl] = useState(bookmarkData.url);
-  const handleUrlChange = (event) => {
-    setUrl(event.target.value);
-  };
-
-  let bookmarkCategoryFromProps;
-  if (creatingNew) {
-    bookmarkCategoryFromProps = '';
-  } else {
-    // eslint-disable-next-line max-len
-    bookmarkCategoryFromProps = bookmarkCategories.filter(({ contains }) => contains.includes(bookmarkData.id));
-  }
-  const [bookmarkCategory, setBookmarkCategory] = useState(bookmarkCategoryFromProps);
-  const handleBookmarkCategoryChange = (event) => {
-    setBookmarkCategory(event.target.action);
-  };
-
   const formFields = (
     <>
-      <TextField label="Name" variant="outlined" fullWidth className={classes.formField} />
-      <TextField label="URL" variant="outlined" fullWidth className={classes.formField} />
+      <TextValidator
+        label="Name"
+        variant="outlined"
+        fullWidth
+        className={fullScreen && classes.formFieldTopMargin}
+        value={name}
+        onChange={onNameChange}
+        validators={['required']}
+        errorMessages={['This field is required.']}
+      />
+      <TextValidator
+        label="URL"
+        variant="outlined"
+        fullWidth
+        className={classes.formFieldTopMargin}
+        value={url}
+        onChange={onUrlChange}
+        validators={['required']}
+        errorMessages={['This field is required.']}
+      />
       <Autocomplete
         freeSolo
-        options={bookmarkCategories.map((category) => category.name)}
+        options={bookmarkCategories.map((categoryToChoose) => categoryToChoose.name)}
+        inputValue={category}
+        onInputChange={onCategoryChange}
         renderInput={(params) => (
-          // eslint-disable-next-line react/jsx-props-no-spreading
           <TextField
+            // eslint-disable-next-line react/jsx-props-no-spreading
             {...params}
             label="Category"
             variant="outlined"
             fullWidth
-            className={classes.formField}
+            className={classes.formFieldTopMargin}
           />
         )}
       />
@@ -93,33 +97,37 @@ export default function BookmarkDialog({
     <Dialog open={open} onClose={onClose} fullScreen={fullScreen} TransitionComponent={Transition}>
       {fullScreen ? (
         <>
-          <AppBar className={classes.appBar}>
-            <Toolbar>
-              <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="h6" className={classes.title}>
-                {creatingNew ? 'Add bookmark' : 'Edit Bookmark'}
-              </Typography>
-              <Button color="inherit" onClick={onDataSave}>
-                Save
-              </Button>
-            </Toolbar>
-          </AppBar>
-          <DialogContent>{formFields}</DialogContent>
+          <ValidatorForm onSubmit={onSave}>
+            <AppBar className={classes.appBar}>
+              <Toolbar>
+                <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
+                  <CloseIcon />
+                </IconButton>
+                <Typography variant="h6" className={classes.title}>
+                  {creatingNew ? 'Add bookmark' : 'Edit Bookmark'}
+                </Typography>
+                <Button color="inherit" type="submit">
+                  Save
+                </Button>
+              </Toolbar>
+            </AppBar>
+            <DialogContent>{formFields}</DialogContent>
+          </ValidatorForm>
         </>
       ) : (
         <>
           <DialogTitle>{creatingNew ? 'Add bookmark' : 'Edit Bookmark'}</DialogTitle>
-          <DialogContent>{formFields}</DialogContent>
-          <DialogActions>
-            <Button onClick={onClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={onDataSave} color="primary">
-              Save
-            </Button>
-          </DialogActions>
+          <ValidatorForm onSubmit={onSave}>
+            <DialogContent>{formFields}</DialogContent>
+            <DialogActions>
+              <Button color="primary" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button color="primary" type="submit">
+                Save
+              </Button>
+            </DialogActions>
+          </ValidatorForm>
         </>
       )}
     </Dialog>
@@ -129,6 +137,12 @@ export default function BookmarkDialog({
 BookmarkDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   creatingNew: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
+  onNameChange: PropTypes.func.isRequired,
+  url: PropTypes.string.isRequired,
+  onUrlChange: PropTypes.func.isRequired,
+  category: PropTypes.string.isRequired,
+  onCategoryChange: PropTypes.func.isRequired,
   bookmarkCategories: PropTypes.arrayOf(
     PropTypes.exact({
       id: PropTypes.number,
@@ -136,18 +150,6 @@ BookmarkDialog.propTypes = {
       contains: PropTypes.arrayOf(PropTypes.number),
     }),
   ).isRequired,
-  bookmarkData: PropTypes.exact({
-    id: PropTypes.number,
-    name: PropTypes.string,
-    url: PropTypes.string,
-  }),
   onClose: PropTypes.func.isRequired,
-  onDataSave: PropTypes.func.isRequired,
-};
-
-BookmarkDialog.defaultProps = {
-  bookmarkData: {
-    name: '',
-    url: '',
-  },
+  onSave: PropTypes.func.isRequired,
 };

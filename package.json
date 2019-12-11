@@ -6,12 +6,16 @@
     "@material-ui/core": "^4.7.2",
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.35",
+    "@rehooks/local-storage": "^2.1.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "material-ui-popup-state": "^1.4.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
+    "react-form-validator-core": "^0.6.4",
+    "react-material-ui-form-validator": "^2.0.9",
     "react-scripts": "3.3.0"
   },
   "scripts": {
@@ -19,15 +23,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "airbnb",
-      "airbnb/hooks"
-    ],
-    "env": {
-      "browser": true
-    }
   },
   "browserslist": {
     "production": [
@@ -42,12 +37,12 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^6.6.0",
+    "eslint": "^6.7.2",
     "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-react-hooks": "^1.7.0",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-react-hooks": "^2.3.0",
     "prettier": "^1.19.1",
     "prettier-eslint": "^9.0.1",
     "prettier-eslint-cli": "^5.0.0"

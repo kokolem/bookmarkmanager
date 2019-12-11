@@ -18,49 +18,26 @@ import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import InputBase from '@material-ui/core/InputBase';
 import { fade, Hidden } from '@material-ui/core';
+import { useLocalStorage, writeStorage } from '@rehooks/local-storage';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import { bindMenu, usePopupState } from 'material-ui-popup-state/hooks';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import BookmarkDialog from './BookmarkDialog';
-
-const bookmarks = [
-  {
-    id: 1,
-    name: 'Google',
-    url: 'https://google.com',
-  },
-  {
-    id: 2,
-    name: 'DuckDuckGo',
-    url: 'https://duckduckgo.com/',
-  },
-  {
-    id: 3,
-    name: 'Google Codein',
-    url: 'https://codein.withgoogle.com',
-  },
-  {
-    id: 4,
-    name: 'Fedora Project',
-    url: 'https://getfedora.org/',
-  },
-];
-const bookmarkCategories = [
-  {
-    id: 1,
-    name: 'Search engines',
-    contains: [1, 2],
-  },
-  {
-    id: 2,
-    name: 'Programming',
-    contains: [3, 4],
-  },
-];
 
 const useStyles = makeStyles((theme) => ({
   text: {
     padding: theme.spacing(2, 2, 0),
   },
   paper: {
-    paddingBottom: 50,
+    margin: 'auto',
+    marginTop: theme.spacing(3),
+    maxWidth: '80vw',
+    paddingBottom: theme.spacing(8),
+    [theme.breakpoints.down('xs')]: {
+      margin: 0,
+      maxWidth: '100vw',
+    },
   },
   subheader: {
     backgroundColor: theme.palette.background.paper,
@@ -114,44 +91,142 @@ const useStyles = makeStyles((theme) => ({
 export default function App() {
   const classes = useStyles();
 
+  const [bookmarks] = useLocalStorage('bookmarks', [
+    {
+      id: 1,
+      name: 'Edit me!',
+      url: 'https://example.com',
+    },
+  ]);
+  const [bookmarkCategories] = useLocalStorage('bookmarkCategories', [
+    {
+      id: 1,
+      name: 'Uncategorized',
+      contains: [1],
+    },
+  ]);
+
+  const [bookmarkDialogName, setBookmarkDialogName] = useState('');
+  const [bookmarkDialogUrl, setBookmarkDialogUrl] = useState('https://');
+  const [bookmarkDialogCategory, setBookmarkDialogCategory] = useState('');
   const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false);
-  const handleBookmarkDialogOpen = () => {
+  const [editingBookmarkId, setEditingBookmarkId] = useState(-1);
+  const [creatingNewBookmark, setCreatingNewBookmark] = useState(false);
+  const createNewBookmark = () => {
+    setBookmarkDialogName('');
+    setBookmarkDialogUrl('https://');
+    setBookmarkDialogCategory('');
+    setEditingBookmarkId(-1);
+    setCreatingNewBookmark(true);
     setBookmarkDialogOpen(true);
   };
-  const handleBookmarkDialogClose = () => {
+  const handleBookmarkDialogSave = () => {
+    if (creatingNewBookmark) {
+      const bookmarkToCreate = {
+        id: bookmarks.length + 1,
+        name: bookmarkDialogName,
+        url: bookmarkDialogUrl,
+      };
+      bookmarks.push(bookmarkToCreate);
+    } else {
+      const bookmarkToUpdate = bookmarks.find((bookmark) => bookmark.id === editingBookmarkId);
+      bookmarkToUpdate.name = bookmarkDialogName;
+      bookmarkToUpdate.url = bookmarkDialogUrl;
+
+      // remove the bookmark from current category
+      // eslint-disable-next-line max-len
+      const currentCategory = bookmarkCategories.find((bookmarkCategory) => bookmarkCategory.contains.includes(editingBookmarkId));
+      // eslint-disable-next-line max-len
+      currentCategory.contains = currentCategory.contains.filter(
+        (bookmarkId) => bookmarkId !== editingBookmarkId,
+      );
+    }
+
+    // add the bookmark to a new category (and create it if it doesn't exist)
+    const categoryFinalName = bookmarkDialogCategory === '' ? 'Uncategorized' : bookmarkDialogCategory;
+    const categoryToAddBookmarkTo = bookmarkCategories.find(
+      (category) => category.name === categoryFinalName,
+    );
+    if (categoryToAddBookmarkTo !== undefined) {
+      categoryToAddBookmarkTo.contains.push(
+        editingBookmarkId === -1 ? bookmarks.length : editingBookmarkId,
+      );
+    } else {
+      const bookmarkCategoryToCreate = {
+        id: bookmarkCategories.length + 1,
+        name: bookmarkDialogCategory,
+        contains: [creatingNewBookmark ? bookmarks.length : editingBookmarkId],
+      };
+      bookmarkCategories.push(bookmarkCategoryToCreate);
+    }
+    writeStorage('bookmarks', bookmarks);
+    writeStorage('bookmarkCategories', bookmarkCategories);
     setBookmarkDialogOpen(false);
+  };
+
+  const bookmarkMenu = usePopupState({
+    variant: 'popover',
+    popupId: 'bookmarkEdit',
+  });
+  const [bookmarkMenuBookmarkId, setBookmarkMenuBookmarkId] = useState(-1);
+  const toggleBookmarkMenu = (bookmarkId, event) => {
+    setBookmarkMenuBookmarkId(bookmarkId);
+    bookmarkMenu.toggle(event);
   };
 
   return (
     <>
       <BookmarkDialog
         open={bookmarkDialogOpen}
-        creatingNew
+        creatingNew={creatingNewBookmark}
+        name={bookmarkDialogName}
+        onNameChange={(e) => setBookmarkDialogName(e.target.value)}
+        url={bookmarkDialogUrl}
+        onUrlChange={(e) => setBookmarkDialogUrl(e.target.value)}
+        category={bookmarkDialogCategory}
+        onCategoryChange={(e, value) => setBookmarkDialogCategory(value)}
         bookmarkCategories={bookmarkCategories}
-        onClose={handleBookmarkDialogClose}
-        onDataSave={handleBookmarkDialogClose}
+        onClose={() => setBookmarkDialogOpen(false)}
+        onSave={handleBookmarkDialogSave}
       />
+      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      <Menu {...bindMenu(bookmarkMenu)}>
+        <MenuItem>Edit</MenuItem>
+        <MenuItem>Delete</MenuItem>
+        <MenuItem>Move up</MenuItem>
+        <MenuItem>Move down</MenuItem>
+      </Menu>
       <CssBaseline />
-      <Paper square className={classes.paper}>
+      <Paper className={classes.paper}>
         <Typography className={classes.text} variant="h5" gutterBottom>
           Your bookmarks
         </Typography>
         <List>
           {bookmarkCategories.map(
             ({ id: categoryId, name: categoryName, contains: categoryContains }) => (
-              <React.Fragment key={categoryId}>
+              <React.Fragment key={`category${categoryId}`}>
                 <ListSubheader className={classes.subheader}>{categoryName}</ListSubheader>
                 {bookmarks.map(({ id: bookmarkId, name: bookmarkName, url: bookmarkUrl }) => (
-                  <React.Fragment key={bookmarkId}>
+                  <React.Fragment key={`bookmark${bookmarkId}in${categoryId}`}>
                     {categoryContains.includes(bookmarkId) && (
                       <ListItem button component="a" href={bookmarkUrl}>
                         <ListItemAvatar>
                           <Avatar
                             alt="Bookmarked websites favicon"
                             src={`https://s2.googleusercontent.com/s2/favicons?domain=${bookmarkUrl}`}
-                          />
+                          >
+                            {bookmarkName[0]}
+                          </Avatar>
                         </ListItemAvatar>
                         <ListItemText primary={bookmarkName} secondary={bookmarkUrl} />
+                        <ListItemSecondaryAction>
+                          <IconButton
+                            edge="end"
+                            onClick={(event) => toggleBookmarkMenu(bookmarkId, event)}
+                          >
+                            <MoreIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
                       </ListItem>
                     )}
                   </React.Fragment>
@@ -187,7 +262,7 @@ export default function App() {
             color="secondary"
             aria-label="add"
             className={classes.fabButton}
-            onClick={handleBookmarkDialogOpen}
+            onClick={createNewBookmark}
           >
             <AddIcon />
           </Fab>
