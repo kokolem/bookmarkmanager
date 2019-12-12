@@ -13,6 +13,7 @@
     "material-ui-popup-state": "^1.4.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
+    "react-app-polyfill": "^1.0.5",
     "react-dom": "^16.12.0",
     "react-form-validator-core": "^0.6.4",
     "react-material-ui-form-validator": "^2.0.9",

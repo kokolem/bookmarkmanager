@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -16,15 +16,22 @@ import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import ClearIcon from '@material-ui/icons/Clear';
 import InputBase from '@material-ui/core/InputBase';
 import {
   fade, Hidden, useMediaQuery, useTheme,
 } from '@material-ui/core';
 import { useLocalStorage, writeStorage } from '@rehooks/local-storage';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { bindMenu, usePopupState } from 'material-ui-popup-state/hooks';
+import { bindMenu, bindToggle, usePopupState } from 'material-ui-popup-state/hooks';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
+import SearchDialog from './SearchDialog';
 import BookmarkDialog from './BookmarkDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -88,6 +95,9 @@ const useStyles = makeStyles((theme) => ({
       width: 200,
     },
   },
+  noBookmarksText: {
+    padding: theme.spacing(2, 2, 0),
+  },
 }));
 
 export default function App() {
@@ -110,10 +120,10 @@ export default function App() {
 
   const bookmarkMenu = usePopupState({
     variant: 'popover',
-    popupId: 'bookmarkEdit',
+    popupId: 'bookmarkMenu',
   });
 
-  // the bookmark which's 'more' button was clicked
+  // the bookmark whose 'more' button was clicked
   const [bookmarkMenuOpenOn, setBookmarkMenuOpenOn] = useState(null);
 
   // whether the bookmark can be moved up in the category
@@ -260,11 +270,77 @@ export default function App() {
     }
 
     writeStorage('bookmarkCategories', bookmarkCategoriesAfterSave);
-    setBookmarkDialogOpen(false);
   };
+
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [searchDialogSearchTerm, setSearchDialogSearchTerm] = useState('');
+  const [bookmarkCategoriesAppliedQuery, setBookmarkCategoriesAppliedQuery] = useState('');
+  const [bookmarkCategoriesSearchResult, setBookmarkCategoriesSearchResult] = useState(
+    bookmarkCategories,
+  );
+  useEffect(() => {
+    if (bookmarkCategoriesAppliedQuery === '') {
+      setBookmarkCategoriesSearchResult(bookmarkCategories);
+    } else {
+      let searchResult = bookmarkCategories.slice(0);
+
+      searchResult = searchResult.map((category) => ({
+        ...category,
+        bookmarks: category.bookmarks.filter(
+          // eslint-disable-next-line max-len
+          (bookmark) => bookmark.name.toLowerCase().includes(bookmarkCategoriesAppliedQuery.toLowerCase())
+            || bookmark.url.toLowerCase().includes(bookmarkCategoriesAppliedQuery.toLowerCase()),
+        ),
+      }));
+
+      // remove empty categories
+      searchResult = searchResult.filter((category) => category.bookmarks.length !== 0);
+
+      setBookmarkCategoriesSearchResult(searchResult);
+    }
+  }, [bookmarkCategories, bookmarkCategoriesAppliedQuery]);
+
+  const appMenu = usePopupState({
+    variant: 'popover',
+    popupId: 'appMenu',
+  });
+
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
   return (
     <>
+      <Dialog open={infoDialogOpen} onClose={() => setInfoDialogOpen(false)}>
+        <DialogTitle>About app</DialogTitle>
+        <DialogContent>
+          <Typography color="textSecondary">
+            This web app was created using React and Material-UI. It uses your browsers local
+            storage to store the bookmarks. It&apos;s also a PWA, which means you can install it
+            like a native app and use it even offline.
+            <br />
+            <br />
+            <b>GitHub:</b>
+            {' '}
+            <a href="https://github.com/kokolem/bookmarkstorage">
+              https://github.com/kokolem/bookmarkstorage
+            </a>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={() => setInfoDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <SearchDialog
+        open={searchDialogOpen}
+        onClose={() => setSearchDialogOpen(false)}
+        searchTerm={searchDialogSearchTerm}
+        onSearchTermChange={(e) => setSearchDialogSearchTerm(e.target.value)}
+        onSearch={() => {
+          setSearchDialogOpen(false);
+          setBookmarkCategoriesAppliedQuery(searchDialogSearchTerm);
+        }}
+      />
       <BookmarkDialog
         open={bookmarkDialogOpen}
         creatingNew={creatingNewBookmark}
@@ -276,8 +352,22 @@ export default function App() {
         onCategoryChange={(e, value) => setBookmarkDialogCategory(value)}
         bookmarkCategories={bookmarkCategories}
         onClose={() => setBookmarkDialogOpen(false)}
-        onSave={handleBookmarkDialogSave}
+        onSave={() => {
+          setBookmarkDialogOpen(false);
+          handleBookmarkDialogSave();
+        }}
       />
+      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      <Menu {...bindMenu(appMenu)}>
+        <MenuItem
+          onClick={() => {
+            appMenu.close();
+            setInfoDialogOpen(true);
+          }}
+        >
+          About app
+        </MenuItem>
+      </Menu>
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <Menu {...bindMenu(bookmarkMenu)}>
         <MenuItem
@@ -323,7 +413,7 @@ export default function App() {
           Your bookmarks
         </Typography>
         <List>
-          {bookmarkCategories.map((category) => (
+          {bookmarkCategoriesSearchResult.map((category) => (
             <React.Fragment key={`category${category.id}`}>
               <ListSubheader className={classes.subheader}>{category.name}</ListSubheader>
               {category.bookmarks.map((bookmark) => (
@@ -352,6 +442,19 @@ export default function App() {
             </React.Fragment>
           ))}
         </List>
+        {bookmarkCategoriesSearchResult.length === 0 && (
+          <>
+            {bookmarkCategoriesAppliedQuery === '' ? (
+              <Typography color="textSecondary" className={classes.noBookmarksText}>
+                No bookmarks saved. Go add some!
+              </Typography>
+            ) : (
+              <Typography color="textSecondary" className={classes.noBookmarksText}>
+                No bookmarks found for your query.
+              </Typography>
+            )}
+          </>
+        )}
       </Paper>
       <AppBar position="fixed" color="primary" className={classes.appBar}>
         <Toolbar>
@@ -362,6 +465,8 @@ export default function App() {
               </div>
               <InputBase
                 placeholder="Search…"
+                value={bookmarkCategoriesAppliedQuery}
+                onChange={(e) => setBookmarkCategoriesAppliedQuery(e.target.value)}
                 classes={{
                   root: classes.inputRoot,
                   input: classes.inputInput,
@@ -371,9 +476,20 @@ export default function App() {
             </div>
           </Hidden>
           <Hidden smUp>
-            <IconButton color="inherit">
+            <IconButton color="inherit" onClick={() => setSearchDialogOpen(true)}>
               <SearchIcon />
             </IconButton>
+            {bookmarkCategoriesAppliedQuery !== '' && (
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  setBookmarkCategoriesAppliedQuery('');
+                  setSearchDialogSearchTerm('');
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
+            )}
           </Hidden>
           <Fab
             color="secondary"
@@ -384,7 +500,8 @@ export default function App() {
             <AddIcon />
           </Fab>
           <div className={classes.grow} />
-          <IconButton edge="end" color="inherit">
+          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+          <IconButton edge="end" color="inherit" {...bindToggle(appMenu)}>
             <MoreIcon />
           </IconButton>
         </Toolbar>
