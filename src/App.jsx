@@ -17,7 +17,9 @@ import AddIcon from '@material-ui/icons/Add';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import InputBase from '@material-ui/core/InputBase';
-import { fade, Hidden } from '@material-ui/core';
+import {
+  fade, Hidden, useMediaQuery, useTheme,
+} from '@material-ui/core';
 import { useLocalStorage, writeStorage } from '@rehooks/local-storage';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { bindMenu, usePopupState } from 'material-ui-popup-state/hooks';
@@ -129,6 +131,44 @@ export default function App() {
     setBookmarkMenuCanBeMovedDown(bookmarkCategory.bookmarks.slice(-1)[0] !== bookmark);
     bookmarkMenu.toggle(event);
   };
+  const handleBookmarkMenuDelete = () => {
+    // let's not mutate the state directly
+    let bookmarkCategoriesAfterSave = bookmarkCategories.slice(0);
+
+    const currentCategory = bookmarkCategoriesAfterSave.find(
+      (category) => category.name === bookmarkMenuOpenOn.categoryName,
+    );
+
+    // delete the bookmark
+    currentCategory.bookmarks = currentCategory.bookmarks.filter(
+      (bookmark) => bookmark.id !== bookmarkMenuOpenOn.id,
+    );
+
+    // if the category the bookmark was in is left empty, delete it too
+    bookmarkCategoriesAfterSave = bookmarkCategoriesAfterSave.filter(
+      (category) => category.bookmarks.length !== 0,
+    );
+
+    writeStorage('bookmarkCategories', bookmarkCategoriesAfterSave);
+  };
+  const handleBookmarkMenuMoveUp = (moveBy) => {
+    // let's not mutate the state directly
+    const bookmarkCategoriesAfterSave = bookmarkCategories.slice(0);
+
+    const currentCategory = bookmarkCategoriesAfterSave.find(
+      (category) => category.name === bookmarkMenuOpenOn.categoryName,
+    );
+
+    const indexOfBookmark = currentCategory.bookmarks.indexOf(bookmarkMenuOpenOn);
+
+    currentCategory.bookmarks.splice(
+      indexOfBookmark - moveBy,
+      0,
+      currentCategory.bookmarks.splice(indexOfBookmark, 1)[0],
+    );
+
+    writeStorage('bookmarkCategories', bookmarkCategoriesAfterSave);
+  };
 
   const [bookmarkDialogName, setBookmarkDialogName] = useState('');
   const [bookmarkDialogUrl, setBookmarkDialogUrl] = useState('https://');
@@ -174,6 +214,8 @@ export default function App() {
           [],
         ),
       ) + 1;
+      // if there are no bookmarks (therefore no categories), Math.max will return -Infinity
+      if (bookmarkAfterEdit.id === -Infinity) bookmarkAfterEdit.id = 1;
     } else {
       // the id doesn't change
       bookmarkAfterEdit.id = editingBookmarkId;
@@ -246,12 +288,37 @@ export default function App() {
         >
           Edit
         </MenuItem>
-        <MenuItem onClick={bookmarkMenu.close}>Delete</MenuItem>
-        {bookmarkMenuCanBeMovedUp && <MenuItem onClick={bookmarkMenu.close}>Move up</MenuItem>}
-        {bookmarkMenuCanBeMovedDown && <MenuItem onClick={bookmarkMenu.close}>Move down</MenuItem>}
+        <MenuItem
+          onClick={() => {
+            bookmarkMenu.close();
+            handleBookmarkMenuDelete();
+          }}
+        >
+          Delete
+        </MenuItem>
+        {bookmarkMenuCanBeMovedUp && (
+          <MenuItem
+            onClick={() => {
+              bookmarkMenu.close();
+              handleBookmarkMenuMoveUp(1);
+            }}
+          >
+            Move up
+          </MenuItem>
+        )}
+        {bookmarkMenuCanBeMovedDown && (
+          <MenuItem
+            onClick={() => {
+              bookmarkMenu.close();
+              handleBookmarkMenuMoveUp(-1);
+            }}
+          >
+            Move down
+          </MenuItem>
+        )}
       </Menu>
       <CssBaseline />
-      <Paper className={classes.paper}>
+      <Paper className={classes.paper} square={useMediaQuery(useTheme().breakpoints.down('xs'))}>
         <Typography className={classes.text} variant="h5" gutterBottom>
           Your bookmarks
         </Typography>
