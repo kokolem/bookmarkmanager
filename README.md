@@ -1,4 +1,13 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Bookmark Manager
+A PWA that stores bookmarks in your browsers local storage
+
+## Used libraries
+ - React
+ - Material-UI
+ - Rehooks/local-storage
+
+## Demo
+Available at https://kokolem.github.io/bookmarkmanager
 
 ## Available Scripts
 

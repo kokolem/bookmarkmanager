@@ -320,8 +320,8 @@ export default function App() {
             <br />
             <b>GitHub:</b>
             {' '}
-            <a href="https://github.com/kokolem/bookmarkstorage">
-              https://github.com/kokolem/bookmarkstorage
+            <a href="https://github.com/kokolem/bookmarkmanager">
+              https://github.com/kokolem/bookmarkmanager
             </a>
           </Typography>
         </DialogContent>
