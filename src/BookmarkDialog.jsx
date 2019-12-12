@@ -58,7 +58,7 @@ export default function BookmarkDialog({
         label="Name"
         variant="outlined"
         fullWidth
-        className={fullScreen && classes.formFieldTopMargin}
+        className={fullScreen ? classes.formFieldTopMargin : null}
         value={name}
         onChange={onNameChange}
         validators={['required']}
@@ -77,6 +77,7 @@ export default function BookmarkDialog({
       <Autocomplete
         freeSolo
         options={bookmarkCategories.map((categoryToChoose) => categoryToChoose.name)}
+        defaultValue={category}
         inputValue={category}
         onInputChange={onCategoryChange}
         renderInput={(params) => (
@@ -147,7 +148,12 @@ BookmarkDialog.propTypes = {
     PropTypes.exact({
       id: PropTypes.number,
       name: PropTypes.string,
-      contains: PropTypes.arrayOf(PropTypes.number),
+      bookmarks: PropTypes.arrayOf(PropTypes.exact({
+        id: PropTypes.number,
+        name: PropTypes.string,
+        url: PropTypes.string,
+        categoryName: PropTypes.string,
+      })),
     }),
   ).isRequired,
   onClose: PropTypes.func.isRequired,

@@ -91,20 +91,44 @@ const useStyles = makeStyles((theme) => ({
 export default function App() {
   const classes = useStyles();
 
-  const [bookmarks] = useLocalStorage('bookmarks', [
-    {
-      id: 1,
-      name: 'Edit me!',
-      url: 'https://example.com',
-    },
-  ]);
   const [bookmarkCategories] = useLocalStorage('bookmarkCategories', [
     {
       id: 1,
       name: 'Uncategorized',
-      contains: [1],
+      bookmarks: [
+        {
+          id: 1,
+          name: 'Edit me!',
+          url: 'https://example.com',
+          categoryName: 'Uncategorized',
+        },
+      ],
     },
   ]);
+
+  const bookmarkMenu = usePopupState({
+    variant: 'popover',
+    popupId: 'bookmarkEdit',
+  });
+
+  // the bookmark which's 'more' button was clicked
+  const [bookmarkMenuOpenOn, setBookmarkMenuOpenOn] = useState(null);
+
+  // whether the bookmark can be moved up in the category
+  const [bookmarkMenuCanBeMovedUp, setBookmarkMenuCanBeMovedUp] = useState(false);
+
+  // whether the bookmark can be moved down in the category
+  const [bookmarkMenuCanBeMovedDown, setBookmarkMenuCanBeMovedDown] = useState(false);
+
+  const toggleBookmarkMenu = (bookmark, event) => {
+    setBookmarkMenuOpenOn(bookmark);
+    const bookmarkCategory = bookmarkCategories.find(
+      (category) => category.name === bookmark.categoryName,
+    );
+    setBookmarkMenuCanBeMovedUp(bookmarkCategory.bookmarks[0] !== bookmark);
+    setBookmarkMenuCanBeMovedDown(bookmarkCategory.bookmarks.slice(-1)[0] !== bookmark);
+    bookmarkMenu.toggle(event);
+  };
 
   const [bookmarkDialogName, setBookmarkDialogName] = useState('');
   const [bookmarkDialogUrl, setBookmarkDialogUrl] = useState('https://');
@@ -120,58 +144,81 @@ export default function App() {
     setCreatingNewBookmark(true);
     setBookmarkDialogOpen(true);
   };
+  const editBookmark = (bookmark) => {
+    setBookmarkDialogName(bookmark.name);
+    setBookmarkDialogUrl(bookmark.url);
+    setBookmarkDialogCategory(bookmark.categoryName);
+    setEditingBookmarkId(bookmark.id);
+    setCreatingNewBookmark(false);
+    setBookmarkDialogOpen(true);
+  };
   const handleBookmarkDialogSave = () => {
-    if (creatingNewBookmark) {
-      const bookmarkToCreate = {
-        id: bookmarks.length + 1,
-        name: bookmarkDialogName,
-        url: bookmarkDialogUrl,
-      };
-      bookmarks.push(bookmarkToCreate);
-    } else {
-      const bookmarkToUpdate = bookmarks.find((bookmark) => bookmark.id === editingBookmarkId);
-      bookmarkToUpdate.name = bookmarkDialogName;
-      bookmarkToUpdate.url = bookmarkDialogUrl;
+    // let's not mutate the state directly
+    let bookmarkCategoriesAfterSave = bookmarkCategories.slice(0);
 
-      // remove the bookmark from current category
+    // bookmark in a category without name is uncategorized
+    const categoryFinalName = bookmarkDialogCategory === '' ? 'Uncategorized' : bookmarkDialogCategory;
+
+    const bookmarkAfterEdit = {
+      id: -1, // will be changed later
+      name: bookmarkDialogName,
+      url: bookmarkDialogUrl,
+      categoryName: categoryFinalName,
+    };
+
+    if (creatingNewBookmark) {
+      // the id is the highest id + 1
+      bookmarkAfterEdit.id = Math.max(
+        ...bookmarkCategoriesAfterSave.reduce(
+          (ids, category) => ids.concat(category.bookmarks.map((bookmark) => bookmark.id)),
+          [],
+        ),
+      ) + 1;
+    } else {
+      // the id doesn't change
+      bookmarkAfterEdit.id = editingBookmarkId;
+
+      // remove the bookmark from the current category
       // eslint-disable-next-line max-len
-      const currentCategory = bookmarkCategories.find((bookmarkCategory) => bookmarkCategory.contains.includes(editingBookmarkId));
-      // eslint-disable-next-line max-len
-      currentCategory.contains = currentCategory.contains.filter(
-        (bookmarkId) => bookmarkId !== editingBookmarkId,
+      const currentCategory = bookmarkCategoriesAfterSave.find((category) => category.bookmarks.map((bookmark) => bookmark.id).includes(editingBookmarkId));
+      currentCategory.bookmarks = currentCategory.bookmarks.filter(
+        (bookmark) => bookmark.id !== editingBookmarkId,
+      );
+
+      // if the category is left empty, remove it too
+      bookmarkCategoriesAfterSave = bookmarkCategoriesAfterSave.filter(
+        (category) => category.bookmarks.length !== 0,
       );
     }
 
-    // add the bookmark to a new category (and create it if it doesn't exist)
-    const categoryFinalName = bookmarkDialogCategory === '' ? 'Uncategorized' : bookmarkDialogCategory;
-    const categoryToAddBookmarkTo = bookmarkCategories.find(
+    // add the bookmark to category (and create it if it doesn't exist)
+    const categoryToAddBookmarkTo = bookmarkCategoriesAfterSave.find(
       (category) => category.name === categoryFinalName,
     );
-    if (categoryToAddBookmarkTo !== undefined) {
-      categoryToAddBookmarkTo.contains.push(
-        editingBookmarkId === -1 ? bookmarks.length : editingBookmarkId,
-      );
-    } else {
-      const bookmarkCategoryToCreate = {
-        id: bookmarkCategories.length + 1,
-        name: bookmarkDialogCategory,
-        contains: [creatingNewBookmark ? bookmarks.length : editingBookmarkId],
+    if (categoryToAddBookmarkTo === undefined) {
+      const categoryToCreate = {
+        // the id is the highest id + 1
+        id:
+          bookmarkCategoriesAfterSave.reduce(
+            (highestId, category) => Math.max(category.id, highestId),
+            0,
+          ) + 1,
+        name: categoryFinalName,
+        bookmarks: [bookmarkAfterEdit],
       };
-      bookmarkCategories.push(bookmarkCategoryToCreate);
-    }
-    writeStorage('bookmarks', bookmarks);
-    writeStorage('bookmarkCategories', bookmarkCategories);
-    setBookmarkDialogOpen(false);
-  };
 
-  const bookmarkMenu = usePopupState({
-    variant: 'popover',
-    popupId: 'bookmarkEdit',
-  });
-  const [bookmarkMenuBookmarkId, setBookmarkMenuBookmarkId] = useState(-1);
-  const toggleBookmarkMenu = (bookmarkId, event) => {
-    setBookmarkMenuBookmarkId(bookmarkId);
-    bookmarkMenu.toggle(event);
+      // if creating the 'Uncategorized' category, add it to the beginning
+      if (categoryFinalName === 'Uncategorized') {
+        bookmarkCategoriesAfterSave.unshift(categoryToCreate);
+      } else {
+        bookmarkCategoriesAfterSave.push(categoryToCreate);
+      }
+    } else {
+      categoryToAddBookmarkTo.bookmarks.push(bookmarkAfterEdit);
+    }
+
+    writeStorage('bookmarkCategories', bookmarkCategoriesAfterSave);
+    setBookmarkDialogOpen(false);
   };
 
   return (
@@ -191,10 +238,17 @@ export default function App() {
       />
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <Menu {...bindMenu(bookmarkMenu)}>
-        <MenuItem>Edit</MenuItem>
-        <MenuItem>Delete</MenuItem>
-        <MenuItem>Move up</MenuItem>
-        <MenuItem>Move down</MenuItem>
+        <MenuItem
+          onClick={() => {
+            bookmarkMenu.close();
+            editBookmark(bookmarkMenuOpenOn);
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem onClick={bookmarkMenu.close}>Delete</MenuItem>
+        {bookmarkMenuCanBeMovedUp && <MenuItem onClick={bookmarkMenu.close}>Move up</MenuItem>}
+        {bookmarkMenuCanBeMovedDown && <MenuItem onClick={bookmarkMenu.close}>Move down</MenuItem>}
       </Menu>
       <CssBaseline />
       <Paper className={classes.paper}>
@@ -202,38 +256,34 @@ export default function App() {
           Your bookmarks
         </Typography>
         <List>
-          {bookmarkCategories.map(
-            ({ id: categoryId, name: categoryName, contains: categoryContains }) => (
-              <React.Fragment key={`category${categoryId}`}>
-                <ListSubheader className={classes.subheader}>{categoryName}</ListSubheader>
-                {bookmarks.map(({ id: bookmarkId, name: bookmarkName, url: bookmarkUrl }) => (
-                  <React.Fragment key={`bookmark${bookmarkId}in${categoryId}`}>
-                    {categoryContains.includes(bookmarkId) && (
-                      <ListItem button component="a" href={bookmarkUrl}>
-                        <ListItemAvatar>
-                          <Avatar
-                            alt="Bookmarked websites favicon"
-                            src={`https://s2.googleusercontent.com/s2/favicons?domain=${bookmarkUrl}`}
-                          >
-                            {bookmarkName[0]}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText primary={bookmarkName} secondary={bookmarkUrl} />
-                        <ListItemSecondaryAction>
-                          <IconButton
-                            edge="end"
-                            onClick={(event) => toggleBookmarkMenu(bookmarkId, event)}
-                          >
-                            <MoreIcon />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    )}
-                  </React.Fragment>
-                ))}
-              </React.Fragment>
-            ),
-          )}
+          {bookmarkCategories.map((category) => (
+            <React.Fragment key={`category${category.id}`}>
+              <ListSubheader className={classes.subheader}>{category.name}</ListSubheader>
+              {category.bookmarks.map((bookmark) => (
+                <React.Fragment key={`bookmark${bookmark.id}`}>
+                  <ListItem button component="a" href={bookmark.url}>
+                    <ListItemAvatar>
+                      <Avatar
+                        alt="Bookmarked websites favicon"
+                        src={`https://s2.googleusercontent.com/s2/favicons?domain=${bookmark.url}`}
+                      >
+                        {bookmark.name[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={bookmark.name} secondary={bookmark.url} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={(event) => toggleBookmarkMenu(bookmark, event)}
+                      >
+                        <MoreIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </React.Fragment>
+              ))}
+            </React.Fragment>
+          ))}
         </List>
       </Paper>
       <AppBar position="fixed" color="primary" className={classes.appBar}>
