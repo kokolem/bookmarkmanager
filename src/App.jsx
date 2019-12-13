@@ -293,7 +293,10 @@ export default function App() {
         bookmarks: category.bookmarks.filter(
           // eslint-disable-next-line max-len
           (bookmark) => bookmark.name.toLowerCase().includes(bookmarkCategoriesAppliedQuery.toLowerCase())
-            || bookmark.url.toLowerCase().includes(bookmarkCategoriesAppliedQuery.toLowerCase()),
+            || bookmark.url
+              .toLowerCase()
+              .replace(/(^\w+:|^)\/\//, '')
+              .includes(bookmarkCategoriesAppliedQuery.toLowerCase()),
         ),
       }));
 
