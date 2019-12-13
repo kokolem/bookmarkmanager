@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.js": "/bookmarkmanager/static/js/main.9c9c4f82.chunk.js",
-    "main.js.map": "/bookmarkmanager/static/js/main.9c9c4f82.chunk.js.map",
+    "main.js": "/bookmarkmanager/static/js/main.a99a8940.chunk.js",
+    "main.js.map": "/bookmarkmanager/static/js/main.a99a8940.chunk.js.map",
     "runtime-main.js": "/bookmarkmanager/static/js/runtime-main.ec737cd2.js",
     "runtime-main.js.map": "/bookmarkmanager/static/js/runtime-main.ec737cd2.js.map",
     "static/js/2.1bc180e1.chunk.js": "/bookmarkmanager/static/js/2.1bc180e1.chunk.js",
     "static/js/2.1bc180e1.chunk.js.map": "/bookmarkmanager/static/js/2.1bc180e1.chunk.js.map",
     "index.html": "/bookmarkmanager/index.html",
-    "precache-manifest.45cc83cae4be505e67eb48bfbade8394.js": "/bookmarkmanager/precache-manifest.45cc83cae4be505e67eb48bfbade8394.js",
+    "precache-manifest.0ad0b30d69a4ff8a769b3b3825bd6963.js": "/bookmarkmanager/precache-manifest.0ad0b30d69a4ff8a769b3b3825bd6963.js",
     "service-worker.js": "/bookmarkmanager/service-worker.js",
     "static/js/2.1bc180e1.chunk.js.LICENSE": "/bookmarkmanager/static/js/2.1bc180e1.chunk.js.LICENSE"
   },
   "entrypoints": [
     "static/js/runtime-main.ec737cd2.js",
     "static/js/2.1bc180e1.chunk.js",
-    "static/js/main.9c9c4f82.chunk.js"
+    "static/js/main.a99a8940.chunk.js"
   ]
 }
