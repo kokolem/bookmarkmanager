@@ -7,7 +7,7 @@ A PWA that stores bookmarks in your browsers local storage
  - Rehooks/local-storage
 
 ## Demo
-Available at https://kokolem.github.io/bookmarkmanager
+Available at https://kokolem.github.io/bookmarkmanager/
 
 ## Available Scripts
 
