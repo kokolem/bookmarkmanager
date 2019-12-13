@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -19,6 +19,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import isURL from 'validator/es/lib/isURL';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -52,6 +53,11 @@ export default function BookmarkDialog({
   const classes = useStyles();
   const fullScreen = useMediaQuery(useTheme().breakpoints.down('xs'));
 
+  useEffect(() => {
+    ValidatorForm.addValidationRule('isURL', (value) => isURL(value));
+    return () => ValidatorForm.removeValidationRule('isURL');
+  }, []);
+
   const formFields = (
     <>
       <TextValidator
@@ -71,8 +77,8 @@ export default function BookmarkDialog({
         className={classes.formFieldTopMargin}
         value={url}
         onChange={onUrlChange}
-        validators={['required']}
-        errorMessages={['This field is required.']}
+        validators={['required', 'isURL']}
+        errorMessages={['This field is required.', 'This is not a URL.']}
       />
       <Autocomplete
         freeSolo
