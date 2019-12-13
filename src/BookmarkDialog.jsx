@@ -80,6 +80,7 @@ export default function BookmarkDialog({
         defaultValue={category}
         inputValue={category}
         onInputChange={onCategoryChange}
+        disableClearable
         renderInput={(params) => (
           <TextField
             // eslint-disable-next-line react/jsx-props-no-spreading
