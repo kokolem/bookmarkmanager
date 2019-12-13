@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "877f149286d3dec88f41d2d537ef71ac",
+    "revision": "34739161959310e8d4ba711862c8f06b",
     "url": "/bookmarkmanager/index.html"
   },
   {
