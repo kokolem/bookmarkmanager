@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "e5d479640019a8eaa8b730ba81a48fd5",
+    "revision": "49e1df8f7b74e54697a10accf79190b2",
     "url": "/bookmarkmanager/index.html"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/bookmarkmanager/static/js/2.1bc180e1.chunk.js.LICENSE"
   },
   {
-    "revision": "313341196c4a54fdba64",
-    "url": "/bookmarkmanager/static/js/main.a99a8940.chunk.js"
+    "revision": "db5d59a8f1fce7257074",
+    "url": "/bookmarkmanager/static/js/main.8e74f6e3.chunk.js"
   },
   {
     "revision": "d6d8e8f69db2b0a62b15",
