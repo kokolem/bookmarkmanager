@@ -424,7 +424,7 @@ export default function App() {
                     <ListItemAvatar>
                       <Avatar
                         alt="Bookmarked websites favicon"
-                        src={`https://besticon-demo.herokuapp.com/icon?url=${bookmark.url}&size=40..40..200`}
+                        src={`https://besticon-demo.herokuapp.com/icon?url=${bookmark.url}&size=32..40..200`}
                       >
                         {bookmark.name[0]}
                       </Avatar>
