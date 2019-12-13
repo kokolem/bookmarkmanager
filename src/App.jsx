@@ -317,12 +317,10 @@ export default function App() {
             storage to store the bookmarks. It&apos;s also a PWA, which means you can install it
             like a native app and use it even offline.
             <br />
-            <br />
-            <b>GitHub:</b>
+            See the source code on
             {' '}
-            <a href="https://github.com/kokolem/bookmarkmanager">
-              https://github.com/kokolem/bookmarkmanager
-            </a>
+            <a href="https://github.com/kokolem/bookmarkmanager/">Github</a>
+.
           </Typography>
         </DialogContent>
         <DialogActions>
