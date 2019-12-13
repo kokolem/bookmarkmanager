@@ -35,7 +35,7 @@ import SearchDialog from './SearchDialog';
 import BookmarkDialog from './BookmarkDialog';
 
 const useStyles = makeStyles((theme) => ({
-  text: {
+  title: {
     padding: theme.spacing(2, 2, 0),
   },
   paper: {
@@ -50,6 +50,7 @@ const useStyles = makeStyles((theme) => ({
   },
   subheader: {
     backgroundColor: theme.palette.background.paper,
+    overflow: 'hidden',
   },
   appBar: {
     top: 'auto',
@@ -97,6 +98,9 @@ const useStyles = makeStyles((theme) => ({
   },
   noBookmarksText: {
     padding: theme.spacing(2, 2, 0),
+  },
+  userGeneratedText: {
+    overflow: 'hidden',
   },
 }));
 
@@ -407,7 +411,7 @@ export default function App() {
       </Menu>
       <CssBaseline />
       <Paper className={classes.paper} square={useMediaQuery(useTheme().breakpoints.down('xs'))}>
-        <Typography className={classes.text} variant="h5" gutterBottom>
+        <Typography className={classes.title} variant="h5" gutterBottom>
           Your bookmarks
         </Typography>
         <List>
@@ -425,7 +429,11 @@ export default function App() {
                         {bookmark.name[0]}
                       </Avatar>
                     </ListItemAvatar>
-                    <ListItemText primary={bookmark.name} secondary={bookmark.url} />
+                    <ListItemText
+                      primary={bookmark.name}
+                      secondary={bookmark.url}
+                      className={classes.userGeneratedText}
+                    />
                     <ListItemSecondaryAction>
                       <IconButton
                         edge="end"
