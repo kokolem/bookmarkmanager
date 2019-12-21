@@ -1,5 +1,15 @@
-# Bookmark Manager
-A PWA that stores bookmarks in your browsers local storage
+<h1 align="center">Bookmark Manager</h1>
+
+<div align="center">
+ 
+ PWA that stores bookmarks in your browsers local storage.
+ 
+ ![GitHub](https://img.shields.io/github/license/kokolem/bookmarkmanager)
+ ![W3C Validation](https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager)
+ ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kokolem/bookmarkmanager)
+ ![GitHub last commit](https://img.shields.io/github/last-commit/kokolem/bookmarkmanager)
+ 
+</div>
 
 ## Used libraries
  - React
