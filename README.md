@@ -5,6 +5,8 @@ A PWA that stores bookmarks in your browsers local storage
  - React
  - Material-UI
  - Rehooks/local-storage
+ 
+See `package.json` for full list.
 
 ## Demo
 Available at https://kokolem.github.io/bookmarkmanager/
