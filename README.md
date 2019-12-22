@@ -1,3 +1,7 @@
+<p align="center">
+ <img width="150" src="https://github.com/kokolem/bookmarkmanager/blob/master/public/android-chrome-192x192.png" alt="Bookmark Manager logo"/>
+</p>
+
 <h1 align="center">Bookmark Manager</h1>
 
 <div align="center">
