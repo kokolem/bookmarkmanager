@@ -8,6 +8,7 @@
  ![W3C Validation](https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager)
  ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kokolem/bookmarkmanager)
  ![GitHub last commit](https://img.shields.io/github/last-commit/kokolem/bookmarkmanager)
+ ![Support <3](https://kokolem.github.io/LGBT-friendly-rainbow.svg)
  
 </div>
 
