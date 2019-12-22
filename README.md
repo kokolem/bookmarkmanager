@@ -8,14 +8,14 @@
  
  PWA that stores bookmarks in your browsers local storage.
  
- ![GitHub](https://img.shields.io/github/license/kokolem/bookmarkmanager)
- ![W3C Validation](https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager)
+ [![License](https://img.shields.io/github/license/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/blob/master/LICENSE)
+ [![W3C Validation](https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager)](https://validator.w3.org/nu/?doc=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager%2F)
  ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kokolem/bookmarkmanager)
- ![GitHub last commit](https://img.shields.io/github/last-commit/kokolem/bookmarkmanager)
- ![GitHub forks](https://img.shields.io/github/forks/kokolem/bookmarkmanager)
- ![GitHub stars](https://img.shields.io/github/stars/kokolem/bookmarkmanager)
- ![GitHub contributors](https://img.shields.io/github/contributors/kokolem/bookmarkmanager)
- ![GitHub issues](https://img.shields.io/github/issues/kokolem/bookmarkmanager)
+ [![GitHub last commit](https://img.shields.io/github/last-commit/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/commits/master)
+ [![GitHub forks](https://img.shields.io/github/forks/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/network/members)
+ [![GitHub stars](https://img.shields.io/github/stars/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/stargazers)
+ [![GitHub contributors](https://img.shields.io/github/contributors/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/graphs/contributors)
+ [![GitHub issues](https://img.shields.io/github/issues/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/issues)
  ![Support <3](https://kokolem.github.io/LGBT-friendly-rainbow.svg)
  
 </div>
