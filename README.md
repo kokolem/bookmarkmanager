@@ -6,7 +6,7 @@
 
 <div align="center">
  
- PWA that stores bookmarks in your browsers local storage.
+ PWA that stores bookmarks in your browser's local storage.
  
  [![License](https://img.shields.io/github/license/kokolem/bookmarkmanager)](https://github.com/kokolem/bookmarkmanager/blob/master/LICENSE)
  [![W3C Validation](https://img.shields.io/w3c-validation/html?targetUrl=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager)](https://validator.w3.org/nu/?doc=https%3A%2F%2Fkokolem.github.io%2Fbookmarkmanager%2F)
