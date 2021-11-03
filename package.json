@@ -14,7 +14,7 @@
     "react-form-validator-core": "^0.6.4",
     "react-material-ui-form-validator": "^2.0.9",
     "react-scripts": "3.3.0",
-    "validator": "^12.1.0"
+    "validator": "^13.7.0"
   },
   "scripts": {
     "deploy": "gh-pages -d build",
